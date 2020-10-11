@@ -95,6 +95,6 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
     clientSocket.close()    
     # Fill in end
 if __name__ == '__main__':
-    #smtp_client(1025, '127.0.0.1')
-    smtp_client(25, '127.0.0.1')
+    smtp_client(1025, '127.0.0.1')
+    #smtp_client(25, '127.0.0.1')
     
