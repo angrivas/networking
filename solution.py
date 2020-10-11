@@ -29,8 +29,8 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
 
     # Send MAIL FROM command and print server response.
     # Fill in start
-    mailFrom = "MAIL FROM:ANG@anghw\r\n"
-    clientSocket.send(mailFrom.encode())
+    fromMessage = "MAIL FROM:ANG@anghw\r\n"
+    clientSocket.send(fromMessage.encode())
     recievedata = clientSocket.recv(1024)
     recievedata = recievedata.decode()
     # if recievedata[:3] != '250':
@@ -42,8 +42,8 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
     # Send RCPT TO command and print server response.
     # Fill in start
     # print("Send RCPT TO command and print server response.")
-    rcptTo = "RCPT TO:veurias@anghw\r\n"
-    clientSocket.send(rcptTo.encode())
+    toMessage = "RCPT TO:veurias@anghw\r\n"
+    clientSocket.send(toMessage.encode())
     recievedata = clientSocket.recv(1024)
     recievedata = recievedata.decode()
     # if recievedata[:3] != '250':
@@ -57,7 +57,8 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
     # Fill in start
     # data = "DATA\r\n"
     # print("Send RCPT TO command and print server response.")
-    clientSocket.send('DATA\r\n'.encode())
+    dataMessage = 'DATA\r\n'
+    clientSocket.send(dataMessage.encode())
     recievedata = clientSocket.recv(1024)
     recievedata = recievedata.decode()
     # if recievedata[:3] != '354':
@@ -71,8 +72,8 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
     # Send message data.
     # Fill in start
     # print("Send message data.")
-    subject = "Subject: This Is A Test Email \r\n\r\n"
-    clientSocket.send(subject.encode())
+    subjectMessage = "Subject: This Is A Test Email \r\n\r\n"
+    clientSocket.send(subjectMessage.encode())
     clientSocket.send(msg.encode())
     # Fill in end
 
@@ -89,8 +90,8 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
 
     # Send QUIT command and get server response.
     # Fill in start
-    quit = "QUIT\r\n"
-    clientSocket.send(quit.encode())
+    quitMessage = "QUIT\r\n"
+    clientSocket.send(quitMessage.encode())
     recievedata = clientSocket.recv(1024)
     # print(recievedata[:1])
     # print("After Quit command: %s" % (recievedata))
