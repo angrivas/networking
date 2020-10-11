@@ -15,17 +15,17 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
     # Fill in end
 
     recv = clientSocket.recv(1024).decode()
-    print(recv)
-    if recv[:3] != '220':
-        print('220 reply not received from server.')
+    # print(recv)
+    # if recv[:3] != '220':
+        # print('220 reply not received from server.')
 
     # Send HELO command and print server response.
     heloCommand = 'HELO Alice\r\n'
     clientSocket.send(heloCommand.encode())
     recv1 = clientSocket.recv(1024).decode()
-    print(recv1)
-    if recv1[:3] != '250':
-        print('250 reply not received from server.')
+    # print(recv1)
+    # if recv1[:3] != '250':
+        # print('250 reply not received from server.')
 
     # Send MAIL FROM command and print server response.
     # Fill in start
@@ -33,44 +33,44 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
     clientSocket.send(mailFrom.encode())
     recievedata = clientSocket.recv(1024)
     recievedata = recievedata.decode()
-    if recievedata[:3] != '250':
-        print('250 reply not received from server.')
-    else:
-        print("After MAIL FROM command: " + recievedata)
+    # if recievedata[:3] != '250':
+        # print('250 reply not received from server.')
+    # else:
+        # print("After MAIL FROM command: " + recievedata)
         # Fill in end
 
     # Send RCPT TO command and print server response.
     # Fill in start
-    print("Send RCPT TO command and print server response.")
+    # print("Send RCPT TO command and print server response.")
     rcptTo = "RCPT TO:veurias@anghw\r\n"
     clientSocket.send(rcptTo.encode())
     recievedata = clientSocket.recv(1024)
     recievedata = recievedata.decode()
-    if recievedata[:3] != '250':
-        print('250 reply not received from server.')
-        return
-    else:
-        print("After RCPT TO command: %s" % (recievedata))
+    # if recievedata[:3] != '250':
+        # print('250 reply not received from server.')
+        # return
+    # else:
+        # print("After RCPT TO command: %s" % (recievedata))
     # Fill in end
 
     # Send DATA command and print server response.
     # Fill in start
     # data = "DATA\r\n"
-    print("Send RCPT TO command and print server response.")
+    # print("Send RCPT TO command and print server response.")
     clientSocket.send('DATA\r\n'.encode())
     recievedata = clientSocket.recv(1024)
     recievedata = recievedata.decode()
-    if recievedata[:3] != '354':
-        print('250 reply not received from server.')
-        return
+    # if recievedata[:3] != '354':
+        # print('250 reply not received from server.')
+        # return
 
-    else:
-        print("After DATA command: %s" % (recievedata))
+    # else:
+        # print("After DATA command: %s" % (recievedata))
     # Fill in end
 
     # Send message data.
     # Fill in start
-    print("Send message data.")
+    # print("Send message data.")
     subject = "Subject: This Is A Test Email \r\n\r\n"
     clientSocket.send(subject.encode())
     clientSocket.send(msg.encode())
@@ -80,10 +80,10 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
     # Fill in start
     clientSocket.send(endmsg.encode())
     recievedata = clientSocket.recv(1024)  # amount of data to be sent
-    print(recievedata)  # print the message
-    if recievedata[:3] != '250':  # if the message does not print properly
-        print('250 reply not received from server.')  # print out
-        return
+    # print(recievedata)  # print the message
+    # if recievedata[:3] != '250':  # if the message does not print properly
+        # print('250 reply not received from server.')  # print out
+        # return
 
         # Fill in end
 
@@ -92,8 +92,8 @@ def smtp_client(port=1025, mailserver='127.0.0.1'):
     quit = "QUIT\r\n"
     clientSocket.send(quit.encode())
     recievedata = clientSocket.recv(1024)
-    print(recievedata[:1])
-    print("After Quit command: %s" % (recievedata))
+    # print(recievedata[:1])
+    # print("After Quit command: %s" % (recievedata))
     clientSocket.close()
     # Fill in end
 
