@@ -1,103 +1,137 @@
 from socket import *
+import os
+import sys
+import struct
+import time
+import select
+import binascii
+import statistics
+# Should use stdev
+
+ICMP_ECHO_REQUEST = 8
 
 
-def smtp_client(port=1025, mailserver='127.0.0.1'):
-    msg = "\r\n My message"
-    endmsg = "\r\n.\r\n"
+def checksum(string):
+    csum = 0
+    countTo = (len(string) // 2) * 2
+    count = 0
 
-    # Choose a mail server (e.g. Google mail server) if you want to verify the script beyond GradeScope
+    while count < countTo:
+        thisVal = (string[count + 1]) * 256 + (string[count])
+        csum += thisVal
+        csum &= 0xffffffff
+        count += 2
 
-    # Create socket called clientSocket and establish a TCP connection with mailserver and port
+    if countTo < len(string):
+        csum += (string[len(string) - 1])
+        csum &= 0xffffffff
 
-    # Fill in start
-    clientSocket = socket(AF_INET, SOCK_STREAM)
-    clientSocket.connect((mailserver, port))
-    # Fill in end
+    csum = (csum >> 16) + (csum & 0xffff)
+    csum = csum + (csum >> 16)
+    answer = ~csum
+    answer = answer & 0xffff
+    answer = answer >> 8 | (answer << 8 & 0xff00)
+    return answer
 
-    recv = clientSocket.recv(1024).decode()
-    # print(recv)
-    # if recv[:3] != '220':
-        # print('220 reply not received from server.')
 
-    # Send HELO command and print server response.
-    heloCommand = 'HELO Alice\r\n'
-    clientSocket.send(heloCommand.encode())
-    recv1 = clientSocket.recv(1024).decode()
-    # print(recv1)
-    # if recv1[:3] != '250':
-        # print('250 reply not received from server.')
 
-    # Send MAIL FROM command and print server response.
-    # Fill in start
-    fromMessage = "MAIL FROM:ANG@anghw\r\n"
-    clientSocket.send(fromMessage.encode())
-    recievedata = clientSocket.recv(1024)
-    recievedata = recievedata.decode()
-    # if recievedata[:3] != '250':
-        # print('250 reply not received from server.')
-    # else:
-        # print("After MAIL FROM command: " + recievedata)
+def receiveOnePing(mySocket, ID, timeout, destAddr):
+    timeLeft = timeout
+
+    while 1:
+        startedSelect = time.time()
+        whatReady = select.select([mySocket], [], [], timeLeft)
+        howLongInSelect = (time.time() - startedSelect)
+        if whatReady[0] == []:  # Timeout
+            return "Request timed out."
+
+        timeReceived = time.time()
+        recPacket, addr = mySocket.recvfrom(1024)
+        
+        # Fill in start
+        
+        # Fetch the ICMP header from the IP packet
+        icmpHeader = recPacket[20:28]
+        requestType, code, packetCheckSum, packetID, packetsquencenumber = struct.unpack('bbHHh',icmpHeader)
+        if ID == packetID:
+            bytesinDouble = struct.calcsize("d")
+            timeSent = struct.unpack("d", recPacket[28:28 + bytesinDouble])[0]
+            rtt=timeReceived - timeSent            
+            return rtt*1000.000000
+        else:
+            return "Wrong ID "
         # Fill in end
+        timeLeft = timeLeft - howLongInSelect
+        if timeLeft <= 0:
+            return "Request timed out."
 
-    # Send RCPT TO command and print server response.
-    # Fill in start
-    # print("Send RCPT TO command and print server response.")
-    toMessage = "RCPT TO:veurias@anghw\r\n"
-    clientSocket.send(toMessage.encode())
-    recievedata = clientSocket.recv(1024)
-    recievedata = recievedata.decode()
-    # if recievedata[:3] != '250':
-        # print('250 reply not received from server.')
-        # return
-    # else:
-        # print("After RCPT TO command: %s" % (recievedata))
-    # Fill in end
 
-    # Send DATA command and print server response.
-    # Fill in start
-    # data = "DATA\r\n"
-    # print("Send RCPT TO command and print server response.")
-    dataMessage = 'DATA\r\n'
-    clientSocket.send(dataMessage.encode())
-    recievedata = clientSocket.recv(1024)
-    recievedata = recievedata.decode()
-    # if recievedata[:3] != '354':
-        # print('250 reply not received from server.')
-        # return
+def sendOnePing(mySocket, destAddr, ID):
+    # Header is type (8), code (8), checksum (16), id (16), sequence (16)
 
-    # else:
-        # print("After DATA command: %s" % (recievedata))
-    # Fill in end
+    myChecksum = 0
+    # Make a dummy header with a 0 checksum
+    # struct -- Interpret strings as packed binary data
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
+    data = struct.pack("d", time.time())
+    # Calculate the checksum on the data and the dummy header.
+    myChecksum = checksum(header + data)
 
-    # Send message data.
-    # Fill in start
-    # print("Send message data.")
-    subjectMessage = "Subject: This Is A Test Email \r\n\r\n"
-    clientSocket.send(subjectMessage.encode())
-    clientSocket.send(msg.encode())
-    # Fill in end
+    # Get the right checksum, and put in the header
 
-    # Message ends with a single period.
-    # Fill in start
-    clientSocket.send(endmsg.encode())
-    recievedata = clientSocket.recv(1024)  # amount of data to be sent
-    # print(recievedata)  # print the message
-    # if recievedata[:3] != '250':  # if the message does not print properly
-        # print('250 reply not received from server.')  # print out
-        # return
+    if sys.platform == 'darwin':
+        # Convert 16-bit integers from host to network  byte order
+        myChecksum = htons(myChecksum) & 0xffff
+    else:
+        myChecksum = htons(myChecksum)
 
-        # Fill in end
 
-    # Send QUIT command and get server response.
-    # Fill in start
-    quitMessage = "QUIT\r\n"
-    clientSocket.send(quitMessage.encode())
-    recievedata = clientSocket.recv(1024)
-    # print(recievedata[:1])
-    # print("After Quit command: %s" % (recievedata))
-    clientSocket.close()
-    # Fill in end
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
+    packet = header + data
 
+    mySocket.sendto(packet, (destAddr, 1))  # AF_INET address must be tuple, not str
+
+
+    # Both LISTS and TUPLES consist of a number of objects
+    # which can be referenced by their position number within the object.
+
+def doOnePing(destAddr, timeout):
+    icmp = getprotobyname("icmp")
+
+
+    # SOCK_RAW is a powerful socket type. For more details:   http://sockraw.org/papers/sock_raw
+    mySocket = socket(AF_INET, SOCK_RAW, icmp)
+
+    myID = os.getpid() & 0xFFFF  # Return the current process i
+    sendOnePing(mySocket, destAddr, myID)
+    delay = receiveOnePing(mySocket, myID, timeout, destAddr)
+    mySocket.close()
+    return delay
+
+
+def ping(host, timeout=1):
+    # timeout=1 means: If one second goes by without a reply from the server,  	# the client assumes that either the client's ping or the server's pong is lost
+    dest = gethostbyname(host)
+    print("Pinging " + dest + " using Python:")
+    print("")
+    listofvalues=[]
+    # Calculate vars values and return them
+    #  vars = [str(round(packet_min, 2)), str(round(packet_avg, 2)), str(round(packet_max, 2)),str(round(stdev(stdev_var), 2))]
+    # Send ping requests to a server separated by approximately one second
+    for i in range(0,4):
+        delay = doOnePing(dest, timeout)
+        listofvalues.append(delay)
+        print(delay)
+        time.sleep(1)  # one second
+    minvalue = min(listofvalues)
+    maxvalue = max(listofvalues)
+    stdvalue=(statistics.stdev(listofvalues))
+    averagevalue=sum(listofvalues) / len(listofvalues)
+    #print("rtt min/avg/max/mdev %s/%s/%s/%s ms"%(minvalue,averagevalue,maxvalue,stdvalue) )
+    vars = [str(round(minvalue, 2)), str(round(averagevalue, 2)), str(round(maxvalue, 2)),str(round(stdvalue, 2))]
+    print(vars)
+
+    return vars
 
 if __name__ == '__main__':
-    smtp_client(25, '127.0.0.1')
+    ping("google.co.il")
