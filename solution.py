@@ -1,38 +1,4 @@
-
-
-
-Skip to content
-Using Gmail with screen readers
-Meet
-New meeting
-Join a meeting
-Hangouts
-
-1 of 9,855
-Traceroute Assignment
-Inbox
-
-Vince Urias
-Attachments7:01 PM (2 hours ago)
- 
-
-Ang Rivas
-7:34 PM (1 hour ago)
-90/100 On Sat, Dec 5, 2020 at 7:01 PM Vince Urias <veurias@gmail.com> wrote:
-
-Vince Urias
-Attachments8:24 PM (42 minutes ago)
-On Sat, Dec 5, 2020 at 7:34 PM Ang Rivas <acrivas@gmail.com> wrote: 90/100 On Sat, Dec 5, 2020 at 7:01 PM Vince Urias <veurias@gmail.com> wrote:
-
-Vince Urias
-Attachments
-9:06 PM (0 minutes ago)
-to me
-
-
-Attachments area
-
-﻿from socket import *
+from socket import *
 import os
 import sys
 import struct
@@ -220,5 +186,3 @@ def get_route(hostname):
 tmplist = get_route("www.google.com") 
 #import pprint
 #pprint.pprint(tmplist )
-solution.py
-Displaying solution.py.
